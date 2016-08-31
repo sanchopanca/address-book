@@ -9,38 +9,43 @@ class AddressBook:
         self._connection = self._init_db(filename)
 
     def add_person(self, person):
-        # TODO: make it inside one transaction
         c = self._connection.cursor()
 
-        # We need to be sure that group exists
-        for group in person.groups:
-            c.execute('SELECT name FROM groups WHERE name = ?', (group.name,))
-            _ = c.fetchone()
+        try:
+            # We need to be sure that group exists
+            for group in person.groups:
+                c.execute('SELECT name FROM groups WHERE name = ?', (group.name,))
+                _ = c.fetchone()
 
-        c.execute('INSERT INTO persons '
-                  '(first_name, last_name) VALUES (?, ?)',
-                  (person.first_name, person.last_name))
-        person_id = c.lastrowid
-        for entry in person.street_addresses:
-            c.execute('INSERT INTO addresses '
-                      '(address, person_id) VALUES (?, ?)',
-                      (entry.address, person_id))
-        for entry in person.emails:
-            c.execute('INSERT INTO emails '
-                      '(email, person_id) VALUES (?, ?)',
-                      (entry.email, person_id))
-        for entry in person.phone_numbers:
-            c.execute('INSERT INTO phone_numbers '
-                      '(phone_number, person_id) VALUES (?, ?)',
-                      (entry.number, person_id))
-        for group in person.groups:
-            c.execute('INSERT INTO persons_groups '
-                      '(person_id, group_name) VALUES (?, ?)',
-                      (person_id, group.name))
+            c.execute('INSERT INTO persons '
+                      '(first_name, last_name) VALUES (?, ?)',
+                      (person.first_name, person.last_name))
+            person_id = c.lastrowid
+            for entry in person.street_addresses:
+                c.execute('INSERT INTO addresses '
+                          '(address, person_id) VALUES (?, ?)',
+                          (entry.address, person_id))
+            for entry in person.emails:
+                c.execute('INSERT INTO emails '
+                          '(email, person_id) VALUES (?, ?)',
+                          (entry.email, person_id))
+            for entry in person.phone_numbers:
+                c.execute('INSERT INTO phone_numbers '
+                          '(phone_number, person_id) VALUES (?, ?)',
+                          (entry.number, person_id))
+            for group in person.groups:
+                c.execute('INSERT INTO persons_groups '
+                          '(person_id, group_name) VALUES (?, ?)',
+                          (person_id, group.name))
+            self._connection.commit()
+        except sqlite3.Error:
+            self._connection.rollback()
+            raise
 
     def add_group(self, group):
         c = self._connection.cursor()
         c.execute('INSERT INTO groups (name) VALUES (?)', (group.name,))
+        self._connection.commit()
 
     def get_group_members(self, group):
         c = self._connection.cursor()
