@@ -15,8 +15,8 @@ class TestAddressBook(unittest.TestCase):
         self.assertEqual(entry.first_name, 'John')
         self.assertEqual(entry.last_name, 'Doe')
         self.assertEqual(entry.street_addresses[0].address, 'New York')
-        self.assertEqual(entry.emails[0].email, ['john@example.com'])
-        self.assertEqual(entry.phone_numbers[0].number, ['88005553535'])
+        self.assertEqual(entry.emails[0].email, 'john@example.com')
+        self.assertEqual(entry.phone_numbers[0].number, '88005553535')
         self.assertEqual(entry.groups, [])
 
     def test_find_by_last_name(self):
@@ -88,11 +88,11 @@ class TestAddressBook(unittest.TestCase):
                                [friends, work]))
 
         entries = book.get_group_members(work)
-        self.assertEqual(len(entries), 2)
-        self.assertEqual({entries[0].first_name, entries[1].first_name}, {'John', 'Jane'})
+        self.assertEqual(len(entries), 1)
 
         entries = book.get_group_members(friends)
-        self.assertEqual(len(entries), 1)
+        self.assertEqual(len(entries), 2)
+        self.assertEqual({entries[0].first_name, entries[1].first_name}, {'John', 'Jane'})
 
         entries = book.get_group_members(family)
         self.assertEqual(len(entries), 0)
